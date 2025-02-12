@@ -27,10 +27,10 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=50, unique=True)
     email = models.EmailField(max_length=100, unique=True)
     password_hash = models.CharField(max_length=255)
-    date_of_birth = models.DateField()
+    date_of_birth = models.DateField(blank=True, null=True)
     gender = models.CharField(max_length=10, blank=True, null=True)
-    height_cm = models.IntegerField(blank=True, null=True)
-    weight_kg = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
+    height = models.IntegerField(blank=True, null=True)
+    weight = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
     goal = models.CharField(max_length=255, blank=True, null=True)
     is_admin = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
@@ -41,7 +41,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     objects = CustomUserManager()
 
     USERNAME_FIELD = 'username'
-    REQUIRED_FIELDS = ['email', 'date_of_birth']
+    REQUIRED_FIELDS = ['email', 'password_hash']
 
     class Meta:
         verbose_name = "Пользователь"
