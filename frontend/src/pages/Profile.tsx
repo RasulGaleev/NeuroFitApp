@@ -2,16 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { User, Edit } from 'lucide-react';
 import { apiService } from '../services/api';
+import { BioType } from '../types/user';
+
 const Profile = () => {
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
-    date_of_birth: '',
-    gender: '',
-    height: 0,
-    weight: 0,
-    goal: '',
-  });
+  date_of_birth: '',
+  gender: '',
+  height: 0,
+  weight: 0,
+  goal: '',
+} as BioType);
 
   useEffect(() => {
     if (user) {
@@ -21,25 +23,24 @@ const Profile = () => {
         height: user.height || 0,
         weight: user.weight || 0,
         goal: user.goal || '',
-      });
+      } as BioType);
     }
   }, [user]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await apiService.updateProfile(formData);
-      setIsEditing(false);
-      window.location.reload();
-    } catch (error) {
-      console.error('Error updating profile:', error);
-    }
-  };
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  try {
+    const response = await apiService.updateProfile(formData);
+    setUser(response.data);
+    setIsEditing(false);
+  } catch (error) {
+    console.error('Ошибка при обновлении данных профиля', error);
+  }
+};
 
   if (!user) {
     return <div>Loading...</div>;
   }
-
   return (
     <div className="min-h-screen bg-gray-900 py-12 px-4">
       <div className="max-w-3xl mx-auto bg-gray-800 rounded-lg shadow-lg p-8">
@@ -68,6 +69,7 @@ const Profile = () => {
               <input
                 type="date"
                 value={formData.date_of_birth}
+                min="1925-01-01"
                 onChange={(e) =>
                   setFormData({ ...formData, date_of_birth: e.target.value })
                 }
@@ -113,8 +115,8 @@ const Profile = () => {
               <input
                 type="number"
                 min="20"
-                max="300"
-                step="0.1"  // Разрешает вводить значения с шагом 0.1
+                max="200"
+                step="0.1"
                 value={formData.weight}
                 onChange={(e) =>
                   setFormData({...formData, weight: parseFloat(e.target.value)})

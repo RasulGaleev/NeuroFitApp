@@ -1,6 +1,6 @@
 import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
-import { RefreshTokenData, TokenData } from "../types/token";
-import { BioData, RegisterData } from "../types/user";
+import { RefreshTokenType, TokenType } from "../types/token";
+import { BioType, RegisterType } from "../types/user";
 
 const API_BASE_URL = "http://localhost:8000/api";
 
@@ -51,9 +51,9 @@ api.interceptors.response.use(
 );
 
 export const apiService = {
-  getToken: (data: TokenData) => api.post('/token/', data),
-  refreshToken: (data: RefreshTokenData) => api.post('/token/refresh/', data),
-  register: (data: RegisterData) => api.post('/users/register/', data),
+  getToken: (data: TokenType) => api.post('/token/', data),
+  refreshToken: (data: RefreshTokenType) => api.post('/token/refresh/', data),
+  register: (data: RegisterType) => api.post('/users/register/', data),
   getProfile: () => api.get('/users/profile/'),
-  updateProfile: (data: BioData) => api.patch('/users/profile/', data),
+  updateProfile: (data: BioType) => api.patch('/users/profile/', data),
 };

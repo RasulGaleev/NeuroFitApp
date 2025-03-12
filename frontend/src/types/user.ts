@@ -1,4 +1,4 @@
-export interface User {
+export interface UserType {
   id: string;
   username: string;
   email: string;
@@ -9,13 +9,13 @@ export interface User {
   goal?: 'weight_loss' | 'muscle_gain' | 'endurance' | 'general_fitness';
 }
 
-export interface RegisterData {
+export interface RegisterType {
   username: string;
   email: string;
   password: string;
 }
 
-export interface BioData {
+export interface BioType {
   date_of_birth: string;
   gender: 'male' | 'female';
   height: number;

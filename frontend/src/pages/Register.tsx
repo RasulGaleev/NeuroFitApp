@@ -29,8 +29,8 @@ const Register = () => {
       await register(username, email, password);
       setShowBiometrics(true);
       toast.success('Регистрация успешна! Теперь давайте настроим ваш профиль.');
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Ошибка при регистрации');
+    } catch (error) {
+      setError(error.response?.data?.password || 'Ошибка при регистрации');
     }
   };
 
@@ -47,8 +47,8 @@ const Register = () => {
       toast.success('Профиль успешно обновлен!');
       navigate('/profile');
       window.location.reload();
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Ошибка при обновлении профиля');
+    } catch (error) {
+      setError(error.response?.data?.message || 'Ошибка при обновлении профиля');
     }
   };
 
@@ -59,7 +59,7 @@ const Register = () => {
           <div className="text-center mb-8">
             <Bot className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
             <h2 className="text-3xl font-bold text-white">Настройка профиля</h2>
-            <p className="text-gray-400 mt-2">Давайте настроим ваш профиль для персонализированных тренировок</p>
+            <p className="text-gray-400 mt-2">Давайте настроим ваш профиль для персонализированных рекомендаций</p>
           </div>
 
           {error && (
@@ -90,6 +90,7 @@ const Register = () => {
                 </label>
                 <input
                   type="date"
+                  min="1925-01-01"
                   required
                   value={date_of_birth}
                   onChange={(e) => setDateOfBirth(e.target.value)}
@@ -107,7 +108,7 @@ const Register = () => {
                   type="number"
                   required
                   step="0.1"
-                  min="30"
+                  min="20"
                   max="200"
                   value={weight}
                   onChange={(e) => setWeight(e.target.value)}
@@ -122,7 +123,7 @@ const Register = () => {
                 <input
                   type="number"
                   required
-                  min="140"
+                  min="50"
                   max="250"
                   value={height}
                   onChange={(e) => setHeight(e.target.value)}

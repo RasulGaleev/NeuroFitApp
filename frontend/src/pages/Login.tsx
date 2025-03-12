@@ -15,8 +15,12 @@ const Login = () => {
     try {
       await login(username, password);
       navigate('/profile');
-    } catch (err) {
-      setError(err.response?.data?.message || 'Ошибка при входе');
+    } catch (error) {
+      if (error.response.status === 401) {
+        setError('Неверный логин или пароль');
+        return;
+      }
+      setError('Ошибка при входе');
     }
   };
 

@@ -1,23 +1,18 @@
 import React, {createContext, useContext, useEffect, useState} from 'react';
 import { apiService } from '../services/api';
-import { User } from "../types/user";
-
-
-interface AuthContextType {
-  user: User | null;
-  isAuthenticated: boolean;
-  login: (username: string, password: string) => Promise<void>;
-  register: (username: string, email: string, password: string) => Promise<void>;
-  logout: () => void;
-}
+import { UserType } from "../types/user";
+import { AuthContextType } from "../types/auth";
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<UserType | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Функция для проверки аутентификации
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
   const checkAuth = async () => {
     const token = localStorage.getItem('accessToken');
     if (token) {
@@ -32,11 +27,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
-  const updateUserData = async (username: string, password: string) => {
+    const updateAuth = async (username: string, password: string) => {
     try {
       const response = await apiService.getToken({ username, password });
       const { access, refresh } = response.data;
@@ -54,18 +45,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (username: string, password: string) => {
     try {
-      await updateUserData(username, password);
+      await updateAuth(username, password);
     } catch (error) {
-      console.error('Ошибка при логине:', error);
+      console.error('Ошибка при входе:', error);
+      throw error;
     }
   };
 
   const register = async (username: string, email: string, password: string) => {
     try {
       await apiService.register({ username, email, password });
-      await updateUserData(username, password);
+      await updateAuth(username, password);
     } catch (error) {
       console.error('Ошибка при регистрации:', error);
+      throw error;
     }
   };
 
@@ -77,7 +70,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, login, register, logout }}>
+    <AuthContext.Provider value={{ user, setUser, isAuthenticated, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );
@@ -86,7 +79,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error('useAuth должен быть использован внутри AuthProvider');
   }
   return context;
 };
