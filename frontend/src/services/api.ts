@@ -1,6 +1,7 @@
 import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import { RefreshTokenType, TokenType } from "../types/token";
 import { BioType, RegisterType } from "../types/user";
+import { CoachGenerateType } from "../types/coach.ts";
 
 const API_BASE_URL = "http://localhost:8000/api";
 
@@ -54,6 +55,7 @@ export const apiService = {
   getToken: (data: TokenType) => api.post('/token/', data),
   refreshToken: (data: RefreshTokenType) => api.post('/token/refresh/', data),
   register: (data: RegisterType) => api.post('/users/register/', data),
+  getGenerate: (data: CoachGenerateType) => api.post('coaches/generate/', data),
   getProfile: () => api.get('/users/profile/'),
   updateProfile: (data: BioType) => api.patch('/users/profile/', data),
 };

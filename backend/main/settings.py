@@ -111,3 +111,5 @@ CORS_ALLOW_ALL_ORIGINS = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'users.CustomUser'
+
+OPENAI_API_KEY = env('OPENAI_API_KEY')

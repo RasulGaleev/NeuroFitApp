@@ -25,10 +25,10 @@ const Navbar = () => {
             {isAuthenticated ? (
               <>
                 <Link
-                  to="/ai-coach"
+                  to="/coach"
                   className="flex items-center space-x-1 hover:text-yellow-500 transition"
                 >
-                  <span>ИИ-тренер</span>
+                  <span>Тренер</span>
                 </Link>
                 <Link
                   to="/nutrition"
