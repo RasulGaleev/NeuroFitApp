@@ -1,26 +1,28 @@
-import openai
-from openai import OpenAI
+from rest_framework import status, generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
-from backend.main import settings
-
-client = OpenAI(api_key=settings.OPENAI_API_KEY)
+from .services import generate_answer
+from .utils import get_system_message
 
 
-class GenerateView(APIView):
+class CoachesGenerateView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
 
-    def post(self, request):
-        messages = request.data["messages"]
-        try:
-            completion = client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=messages,
-            )
-            content = completion.choices[0].message.content
-            return Response({"answer": content})
+    def create(self, request, *args, **kwargs):
+        messages = request.data.get("messages")
 
-        except openai.OpenAIError as e:
-            return Response({"error": f"Ошибка OpenAI: {str(e)}"}, status=500)
+        if not messages or not isinstance(messages, list):
+            return Response(
+                {"error": "Поле 'messages' обязательно и должно быть списком."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        system_message = get_system_message(request.user)
+        full_messages = [system_message] + messages
+
+        try:
+            answer = generate_answer(full_messages)
+            return Response({"answer": answer}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

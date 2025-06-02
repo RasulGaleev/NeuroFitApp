@@ -2,6 +2,8 @@ import environ
 from datetime import timedelta
 from pathlib import Path
 
+from openai import OpenAI
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 ENV_FILE = BASE_DIR / '.env'
 
@@ -27,11 +29,31 @@ INSTALLED_APPS = [
     'drf_yasg',
 
     'users',
+    'coaches',
+    'progress',
+    'workouts',
+    'nutrition',
+    'blog'
 ]
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.OrderingFilter',
+        'rest_framework.filters.SearchFilter',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 20,
+    'DEFAULT_PARSER_CLASSES': [
+        'rest_framework.parsers.JSONParser',
+        'rest_framework.parsers.MultiPartParser',
+        'rest_framework.parsers.FormParser',
     ],
 }
 
@@ -106,10 +128,24 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# Create media directories if they don't exist
+MEDIA_DIRS = [
+    MEDIA_ROOT / 'avatars',
+    MEDIA_ROOT / 'progress_photos',
+    MEDIA_ROOT / 'blog_images',
+]
+
+for directory in MEDIA_DIRS:
+    directory.mkdir(parents=True, exist_ok=True)
+
 CORS_ALLOW_ALL_ORIGINS = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'users.CustomUser'
 
-OPENAI_API_KEY = env('OPENAI_API_KEY')
+OPENAI_CLIENT = OpenAI(api_key=env('OPENAI_API_KEY'))
+

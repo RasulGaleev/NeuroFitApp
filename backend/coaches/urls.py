@@ -1,6 +1,7 @@
 from django.urls import path
-from .views import GenerateView
+
+from .views import CoachesGenerateView
 
 urlpatterns = [
-    path('generate/', GenerateView.as_view(), name='generate'),
+    path("generate/", CoachesGenerateView.as_view(), name="coaches-generate"),
 ]

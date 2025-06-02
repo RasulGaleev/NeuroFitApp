@@ -1,47 +1,41 @@
+from django.contrib.auth import get_user_model
+from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 
-from .models import CustomUser
+User = get_user_model()
 
 
 class RegisterSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)
+    password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
+    password2 = serializers.CharField(write_only=True, required=True)
 
     class Meta:
-        model = CustomUser
+        model = User
         fields = (
-            'username',
-            'email',
-            'password',
+            'username', 'email', 'password', 'password2',
+            'date_of_birth', 'gender', 'height', 'weight',
+            'goal', 'has_equipment'
         )
 
-    def validate_password(self, value):
-        if len(value) < 8:
-            raise serializers.ValidationError("Пароль должен содержать минимум 8 символов.")
-        return value
+    def validate(self, attrs):
+        if attrs.get('password') != attrs.get('password2'):
+            raise serializers.ValidationError({"password": "Пароли не совпадают"})
+        return attrs
 
     def create(self, validated_data):
-        user = CustomUser.objects.create_user(
-            username=validated_data['username'],
-            email=validated_data['email'],
-            password=validated_data['password'],
-        )
+        password = validated_data.pop('password')
+        validated_data.pop('password2', None)
+        user = User.objects.create(**validated_data)
+        user.set_password(password)
+        user.save()
         return user
 
 
 class UserSerializer(serializers.ModelSerializer):
-
     class Meta:
-        model = CustomUser
+        model = User
         fields = (
-            'id',
-            'username',
-            'email',
-            'date_of_birth',
-            'gender',
-            'height',
-            'weight',
-            'goal',
-            'created_at',
-            'updated_at',
-        )
-        read_only_fields = ('id', 'created_at', 'updated_at')
+            'id', 'username', 'email',
+            'date_of_birth', 'gender', 'height', 'weight',
+            'goal', 'has_equipment', 'avatar')
+        read_only_fields = ('id', 'email')
