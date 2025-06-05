@@ -16,20 +16,26 @@ const Register = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [password2, setPassword2] = useState('');
 
   const [date_of_birth, setDateOfBirth] = useState('');
   const [gender, setGender] = useState<'male' | 'female'>('male');
   const [weight, setWeight] = useState('');
   const [height, setHeight] = useState('');
   const [goal, setGoal] = useState<TrainingGoal>('general_fitness');
+  const [has_equipment, setHasEquipment] = useState(false);
 
   const handleInitialRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (password !== password2) {
+      setError('Пароли не совпадают');
+      return;
+    }
     try {
       await register(username, email, password);
       setShowBiometrics(true);
       toast.success('Регистрация успешна! Теперь давайте настроим ваш профиль.');
-    } catch (error) {
+    } catch (error: any) {
       setError(error.response?.data?.password || 'Ошибка при регистрации');
     }
   };
@@ -42,12 +48,13 @@ const Register = () => {
         gender,
         weight: parseFloat(weight),
         height: parseInt(height),
-        goal
+        goal,
+        has_equipment
       });
       toast.success('Профиль успешно обновлен!');
       navigate('/profile');
       window.location.reload();
-    } catch (error) {
+    } catch (error: any) {
       setError(error.response?.data?.message || 'Ошибка при обновлении профиля');
     }
   };
@@ -148,6 +155,19 @@ const Register = () => {
               </select>
             </div>
 
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="has_equipment"
+                checked={has_equipment}
+                onChange={(e) => setHasEquipment(e.target.checked)}
+                className="h-4 w-4 text-yellow-500 focus:ring-yellow-500 border-gray-600 rounded bg-gray-700"
+              />
+              <label htmlFor="has_equipment" className="ml-2 block text-sm text-gray-300">
+                У меня есть спортивное оборудование
+              </label>
+            </div>
+
             <button
               type="submit"
               className="w-full flex justify-center items-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-gray-900 bg-yellow-500 hover:bg-yellow-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 focus:ring-offset-gray-900"
@@ -210,6 +230,19 @@ const Register = () => {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              className="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-300">
+              Подтвердите пароль
+            </label>
+            <input
+              type="password"
+              required
+              value={password2}
+              onChange={(e) => setPassword2(e.target.value)}
               className="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
             />
           </div>

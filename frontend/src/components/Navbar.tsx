@@ -37,10 +37,16 @@ const Navbar = () => {
                   <span>Питание</span>
                 </Link>
                 <Link
-                  to="/training"
+                  to="/workouts"
                   className="flex items-center space-x-1 hover:text-yellow-500 transition"
                 >
                   <span>Тренировки</span>
+                </Link>
+                <Link
+                  to="/progress"
+                  className="flex items-center space-x-1 hover:text-yellow-500 transition"
+                >
+                  <span>Прогресс</span>
                 </Link>
                 <Link
                   to="/profile"

@@ -8,9 +8,8 @@ from workouts.models import Workout
 class Post(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     content = models.TextField()
-    workout = models.ForeignKey(Workout, null=True, blank=True, on_delete=models.SET_NULL)
-    meal_plan = models.ForeignKey(Nutrition, null=True, blank=True, on_delete=models.SET_NULL)
     image = models.ImageField(upload_to='blog_images/', null=True, blank=True)
+    is_approved = models.BooleanField(default=False)
     created_at = models.DateTimeField(default=now)
 
 

@@ -38,7 +38,8 @@ class NutritionViewSet(viewsets.ModelViewSet):
         nutrition = self.get_queryset().first()
         if nutrition:
             return Response({
-                "nutrition": nutrition.meals,
+                "id": nutrition.id,
+                "meals": nutrition.meals,
                 "calories": nutrition.calories,
                 "date": nutrition.date
             })
@@ -58,8 +59,10 @@ class NutritionViewSet(viewsets.ModelViewSet):
                 calories=data.get("calories")
             )
             return Response({
-                "nutrition": nutrition.meals,
+                "id": nutrition.id,
+                "date": nutrition.date,
+                "meals": nutrition.meals,
                 "calories": nutrition.calories
-            })
+            },  status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

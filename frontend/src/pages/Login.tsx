@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { apiService } from '../services/api';
 import { LogIn } from 'lucide-react';
 
 const Login = () => {
@@ -8,15 +8,16 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await login(username, password);
+      const response = await apiService.login({ username, password });
+      localStorage.setItem('accessToken', response.data.access);
+      localStorage.setItem('refreshToken', response.data.refresh);
       navigate('/profile');
-    } catch (error) {
-      if (error.response.status === 401) {
+    } catch (error: any) {
+      if (error.response?.status === 401) {
         setError('Неверный логин или пароль');
         return;
       }

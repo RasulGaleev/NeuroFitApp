@@ -8,8 +8,10 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
 import Coach from "./pages/Coach.tsx";
-import Training from "./pages/Training";
+import Workouts from "./pages/Workouts";
 import Nutrition from "./pages/Nutrition";
+import Progress from "./pages/Progress.tsx";
+import Blog from "./pages/Blog.tsx"
 
 function App() {
   return (
@@ -23,8 +25,10 @@ function App() {
             <Route path="/register" element={<Register/>}/>
             <Route path="/profile" element={<Profile/>}/>
             <Route path="/coach" element={<Coach/>}/>
-            <Route path="/training" element={<Training/>}/>
+            <Route path="/workouts" element={<Workouts/>}/>
             <Route path="/nutrition" element={<Nutrition/>}/>
+            <Route path="/progress" element={<Progress/>}/>
+            <Route path="/blog" element={<Blog/>}/>
           </Routes>
           <Toaster position="top-right"/>
         </div>

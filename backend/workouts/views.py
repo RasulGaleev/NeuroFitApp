@@ -35,7 +35,12 @@ class WorkoutViewSet(viewsets.ModelViewSet):
     def latest(self, request):
         workout = self.get_queryset().first()
         if workout:
-            return Response({"workout": workout.plan, "date": workout.date})
+            return Response({
+                "id": workout.id,
+                "date": workout.date,
+                "plan": workout.plan,
+                "completed": workout.completed
+            })
         return Response({"message": "Нет сохранённых тренировок."}, status=404)
 
     @action(detail=False, methods=['post'])
@@ -47,7 +52,12 @@ class WorkoutViewSet(viewsets.ModelViewSet):
             result = generate_answer(messages=messages, temperature=0.1)
             data = json.loads(result)
             workout = Workout.objects.create(user=request.user, plan=data)
-            return Response({"workout": workout.plan})
+            return Response({
+                "id": workout.id,
+                "date": workout.date,
+                "plan": workout.plan,
+                "completed": workout.completed
+            }, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

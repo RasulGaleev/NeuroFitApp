@@ -5,8 +5,8 @@ from .models import Post, Comment, Like
 
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
-    list_display = ('user', 'created_at', 'workout', 'meal_plan')
-    list_filter = ('created_at',)
+    list_display = ('user', 'is_approved', 'created_at', )
+    list_filter = ('is_approved', 'created_at')
     search_fields = ('user__username', 'content')
     ordering = ('-created_at',)
 
