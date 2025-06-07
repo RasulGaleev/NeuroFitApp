@@ -134,7 +134,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # Create media directories if they don't exist
 MEDIA_DIRS = [
     MEDIA_ROOT / 'avatars',
-    MEDIA_ROOT / 'progress_photos',
+    MEDIA_ROOT / 'progress_images',
     MEDIA_ROOT / 'blog_images',
 ]
 

@@ -26,6 +26,11 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         ENDURANCE = 'endurance', 'Выносливость'
         GENERAL = 'general_fitness', 'Общая физическая форма'
 
+    class FitnessLevel(models.TextChoices):
+        BEGINNER = 'beginner', 'Низкий'
+        INTERMEDIATE = 'intermediate', 'Средний'
+        ADVANCED = 'advanced', 'Высокий'
+
     username = models.CharField(max_length=50, unique=True)
     email = models.EmailField(unique=True)
     date_of_birth = models.DateField(null=True, blank=True)
@@ -33,6 +38,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     height = models.PositiveIntegerField(null=True, blank=True)
     weight = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     goal = models.CharField(max_length=20, choices=FitnessGoal.choices, null=True, blank=True)
+    fitness_level = models.CharField(max_length=20, choices=FitnessLevel.choices, null=True, blank=True)
     has_equipment = models.BooleanField(default=True)
 
     avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)

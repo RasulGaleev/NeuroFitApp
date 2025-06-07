@@ -8,7 +8,7 @@ from .models import ProgressChart
 from .serializers import ProgressChartSerializer
 
 
-class ProgressChartFilter(filters.FilterSet):
+class ProgressFilter(filters.FilterSet):
     date = filters.DateFilter(field_name='date')
 
     class Meta:
@@ -16,10 +16,10 @@ class ProgressChartFilter(filters.FilterSet):
         fields = ['date']
 
 
-class ProgressChartViewSet(viewsets.ModelViewSet):
+class ProgressViewSet(viewsets.ModelViewSet):
     serializer_class = ProgressChartSerializer
     permission_classes = [IsAuthenticated]
-    filterset_class = ProgressChartFilter
+    filterset_class = ProgressFilter
     ordering_fields = ['date']
     ordering = ['-date']
 

@@ -2,6 +2,7 @@ import json
 
 from coaches.services import generate_answer
 from coaches.utils import get_system_message, workout_instruction
+from django.utils.timezone import now
 from django_filters import rest_framework as filters
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
@@ -33,7 +34,8 @@ class WorkoutViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'])
     def latest(self, request):
-        workout = self.get_queryset().first()
+        today = now().date()
+        workout = self.get_queryset().filter(date=today).order_by('-created_at').first()
         if workout:
             return Response({
                 "id": workout.id,
@@ -41,7 +43,7 @@ class WorkoutViewSet(viewsets.ModelViewSet):
                 "plan": workout.plan,
                 "completed": workout.completed
             })
-        return Response({"message": "Нет сохранённых тренировок."}, status=404)
+        return Response({"message": "Нет тренировки на сегодня."}, status=404)
 
     @action(detail=False, methods=['post'])
     def generate(self, request):
@@ -66,4 +68,4 @@ class WorkoutViewSet(viewsets.ModelViewSet):
         workout = self.get_object()
         workout.completed = True
         workout.save()
-        return Response({'status': 'workout completed'}, status=status.HTTP_200_OK)
+        return Response({'status': 'Workout completed'}, status=status.HTTP_200_OK)

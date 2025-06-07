@@ -8,5 +8,5 @@ class ProgressChart(models.Model):
     date = models.DateField(default=now)
     weight = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     height = models.PositiveIntegerField(null=True, blank=True)
-    photo = models.ImageField(upload_to='progress_photos/', null=True, blank=True)
-    notes = models.TextField(blank=True)
+    photo = models.ImageField(upload_to='progress_images/', null=True, blank=True)
+    notes = models.TextField()

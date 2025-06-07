@@ -1,10 +1,13 @@
+from datetime import date, timedelta
+
 from django.test import TestCase
 from django.urls import reverse
-from rest_framework.test import APIClient
 from rest_framework import status
+from rest_framework.test import APIClient
 from users.models import CustomUser
+
 from .models import Workout
-from datetime import date, timedelta
+
 
 class WorkoutTests(TestCase):
     def setUp(self):
@@ -15,12 +18,11 @@ class WorkoutTests(TestCase):
             password='testpass123'
         )
         self.client.force_authenticate(user=self.user)
-        
+
         self.list_url = reverse('workouts-list')
         self.generate_url = reverse('workouts-generate')
         self.latest_url = reverse('workouts-latest')
 
-        # Создаем тестовые тренировки
         self.workout1 = Workout.objects.create(
             user=self.user,
             plan=[{"exercise": "Push-ups", "sets": 3, "reps": 10}],
@@ -38,11 +40,9 @@ class WorkoutTests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_filter_workouts(self):
-        # Фильтр по дате
         response = self.client.get(f"{self.list_url}?date={date.today()}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        # Фильтр по статусу
         response = self.client.get(f"{self.list_url}?completed=true")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -66,7 +66,6 @@ class WorkoutTests(TestCase):
         response = self.client.post(complete_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['status'], 'workout completed')
-        
-        # Проверяем что тренировка отмечена как выполненная
+
         workout = Workout.objects.get(id=self.workout1.id)
         self.assertTrue(workout.completed)

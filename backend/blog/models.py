@@ -1,8 +1,6 @@
 from django.db import models
 from django.utils.timezone import now
-from nutrition.models import Nutrition
 from users.models import CustomUser
-from workouts.models import Workout
 
 
 class Post(models.Model):
