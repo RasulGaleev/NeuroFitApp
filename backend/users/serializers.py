@@ -14,7 +14,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         fields = (
             'username', 'email', 'password', 'password2',
             'date_of_birth', 'gender', 'height', 'weight',
-            'goal', 'has_equipment'
+            'goal', 'fitness_level', 'has_equipment', 'avatar'
         )
 
     def validate(self, attrs):
@@ -37,5 +37,5 @@ class UserSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'username', 'email',
             'date_of_birth', 'gender', 'height', 'weight',
-            'goal', 'has_equipment', 'avatar')
-        read_only_fields = ('id', 'email')
+            'goal', 'fitness_level', 'has_equipment', 'avatar')
+        read_only_fields = ('id', 'username')

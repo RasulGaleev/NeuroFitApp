@@ -1,8 +1,8 @@
 import json
 
 from coaches.services import generate_answer
-from coaches.utils import get_system_message, workout_instruction
-from django.utils.timezone import now
+from coaches.utils import get_system_message
+from django.utils.timezone import now, localtime
 from django_filters import rest_framework as filters
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
@@ -34,7 +34,7 @@ class WorkoutViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'])
     def latest(self, request):
-        today = now().date()
+        today = localtime(now()).date()
         workout = self.get_queryset().filter(date=today).order_by('-created_at').first()
         if workout:
             return Response({
@@ -47,13 +47,13 @@ class WorkoutViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['post'])
     def generate(self, request):
-        system_msg = get_system_message(request.user)
-        messages = [system_msg, workout_instruction]
-
         try:
-            result = generate_answer(messages=messages, temperature=0.1)
+            result = generate_answer(messages=[get_system_message(request.user, "workout")], temperature=0.2)
             data = json.loads(result)
-            workout = Workout.objects.create(user=request.user, plan=data)
+            workout = Workout.objects.create(
+                user=request.user,
+                plan=data
+            )
             return Response({
                 "id": workout.id,
                 "date": workout.date,
