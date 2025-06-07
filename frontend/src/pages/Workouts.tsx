@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 const Workouts: React.FC = () => {
   const [workout, setWorkout] = useState<Workout | null>(null);
   const [loading, setLoading] = useState(true);
+  const [notification, setNotification] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -87,6 +88,8 @@ const Workouts: React.FC = () => {
       }
       await apiService.completeWorkout(workout.id);
       setWorkout(prev => (prev ? { ...prev, completed: true } : prev));
+      setNotification('Тренировка успешно выполнена!');
+      setTimeout(() => setNotification(null), 3000);
     } catch (error) {
       console.error('Ошибка при завершении тренировки:', error);
     }
@@ -102,16 +105,29 @@ const Workouts: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-900 py-12 px-4">
+      {notification && (
+        <div className="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-md shadow-lg z-50">
+          {notification}
+        </div>
+      )}
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-100">Тренировка на сегодня</h1>
-          <button
-            onClick={handleGenerate}
-            className="bg-yellow-500 text-gray-900 px-4 py-2 rounded-md hover:bg-yellow-400 transition flex items-center gap-2"
-          >
-            <RefreshCw className="w-5 h-5" />
-            Обновить
-          </button>
+          {workout?.completed ? (
+            <div className="text-green-500 font-medium flex items-center gap-2">
+              <Check className="w-5 h-5" />
+              Тренировка выполнена
+              <span className="text-gray-400 text-sm">(Следующая тренировка будет доступна завтра)</span>
+            </div>
+          ) : (
+            <button
+              onClick={handleGenerate}
+              className="bg-yellow-500 text-gray-900 px-4 py-2 rounded-md hover:bg-yellow-400 transition flex items-center gap-2"
+            >
+              <RefreshCw className="w-5 h-5" />
+              Сгенерировать
+            </button>
+          )}
         </div>
 
         {workout ? (

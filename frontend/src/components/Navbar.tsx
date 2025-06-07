@@ -1,22 +1,36 @@
-import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useLayoutEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Bot, User, LogOut } from 'lucide-react';
 
 const Navbar = () => {
   const { isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const handleLogout = () => {
-    logout();
+  useLayoutEffect(() => {
+  if (isAuthenticated && location.pathname === '/') {
+    navigate('/blog');
+  }
+}, [isAuthenticated, location.pathname, navigate]);
+
+  const handleLogout = async () => {
+  try {
+    await logout();
+  } catch (error) {
+    console.error('Ошибка при выходе:', error);
+  } finally {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
     navigate('/login');
-  };
+  }
+};
 
   return (
     <nav className="bg-gray-800 text-gray-100 shadow-lg border-b border-gray-700">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between h-16 items-center">
-          <Link to="/" className="flex items-center space-x-2">
+          <Link to={isAuthenticated ? "/blog" : "/"} className="flex items-center space-x-2">
             <Bot className="h-8 w-8 text-yellow-500"/>
             <span className="font-bold text-xl text-white">NeuroFit</span>
           </Link>

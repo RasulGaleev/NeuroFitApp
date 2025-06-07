@@ -1,8 +1,12 @@
 import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
-import {
-  RefreshTokenType, TokenType, BioType, RegisterType,
-  CoachGenerateType, Workout, Nutrition, Post, Comment, ProgressChart
-} from '../types';
+import { ProfileType, RegisterType } from '../types/user.ts';
+import { CoachGenerateType } from '../types/coach';
+import { RefreshTokenType, TokenType } from '../types/token.ts';
+import { WorkoutType } from '../types/workouts';
+import { NutritionType } from '../types/nutrition';
+import { ProgressChartType } from '../types/progress';
+import { CommentType, PostType } from "../types/blog.ts";
+
 
 const API_BASE_URL = 'http://localhost:8000/api';
 
@@ -14,9 +18,11 @@ const clearTokens = () => {
   localStorage.removeItem('refreshToken');
 };
 
-export const api = axios.create({ baseURL: API_BASE_URL });
+export const api = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: 10000
+});
 
-// Attach access token to request headers
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = getAccessToken();
@@ -26,22 +32,33 @@ api.interceptors.request.use(
   (error: AxiosError) => Promise.reject(error)
 );
 
-// Handle 401 errors and try to refresh token
 api.interceptors.response.use(
   (response: AxiosResponse) => response,
   async (error: AxiosError) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-      try {
-        const refreshToken = getRefreshToken();
-        if (refreshToken) {
-          const { data } = await api.post<{ access: string }>('/token/refresh/', { refresh_token: refreshToken });
+      const refreshToken = getRefreshToken();
+
+      if (refreshToken) {
+        try {
+          const { data } = await axios.post(`${API_BASE_URL}/token/refresh/`, {
+            refresh: refreshToken
+          });
+
           setAccessToken(data.access);
-          originalRequest.headers.Authorization = `Bearer ${data.access}`;
+          originalRequest.headers = {
+            ...originalRequest.headers,
+            Authorization: `Bearer ${data.access}`,
+          };
+
           return api(originalRequest);
+        } catch (refreshError) {
+          clearTokens();
+          window.location.href = '/login';
         }
-      } catch {
+      } else {
         clearTokens();
         window.location.href = '/login';
       }
@@ -49,8 +66,6 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
-
-// --- API Service ---
 
 export const apiService = {
   // Auth
@@ -61,40 +76,37 @@ export const apiService = {
   // User
   register: (data: RegisterType) => api.post('/users/register/', data),
   getProfile: () => api.get('/users/profile/'),
-  updateProfile: (data: BioType) => api.patch('/users/profile/', data),
+  updateProfile: (data: ProfileType) => api.patch('/users/profile/', data),
 
   // Coach
   getGenerate: (data: CoachGenerateType) => api.post('/coaches/generate/', data),
 
   // Workout
-  generateWorkout: () => api.post<Workout>('/workouts/generate/'),
-  getLatestWorkout: () => api.get<Workout>('/workouts/latest/'),
-  completeWorkout: (id: number) => axios.post(`/workouts/${id}/complete/`),
+  generateWorkout: () => api.post<WorkoutType>('/workouts/generate/'),
+  getLatestWorkout: () => api.get<WorkoutType>('/workouts/latest/'),
+  completeWorkout: (id: number) => api.post(`/workouts/${id}/complete/`),
 
 
   // Nutrition
-  generateNutritionPlan: () => api.post<Nutrition>('/nutrition/generate/'),
-  getLatestNutritionPlan: () => api.get<Nutrition>('/nutrition/latest/'),
+  generateNutritionPlan: () => api.post<NutritionType>('/nutrition/generate/'),
+  getLatestNutritionPlan: () => api.get<NutritionType>('/nutrition/latest/'),
 
   // Posts
-  getPosts: () => api.get<Post[]>('/posts/'),
-  getPost: (id: number) => api.get<Post>(`/posts/${id}/`),
-  createPost: (data: Partial<Post>) => api.post<Post>('/posts/', data),
-  updatePost: (id: number, data: Partial<Post>) => api.patch<Post>(`/posts/${id}/`, data),
+  getPosts: () => api.get<PostType[]>('/posts/'),
+  getPost: (id: number) => api.get<PostType>(`/posts/${id}/`),
+  createPost: (data: Partial<PostType>) => api.post<PostType>('/posts/', data),
+  updatePost: (id: number, data: Partial<PostType>) => api.patch<PostType>(`/posts/${id}/`, data),
   deletePost: (id: number) => api.delete(`/posts/${id}/`),
   likePost: (id: number) => api.post(`/posts/${id}/like/`),
 
   // Comments
-  getComments: (postId: number) => api.get<Comment[]>(`/posts/${postId}/comments/`),
-  addComment: (postId: number, data: { content: string }) =>
-    api.post<Comment>(`/posts/${postId}/comments/`, data),
+  getComments: (postId: number) => api.get<CommentType[]>(`/posts/${postId}/comments/`),
+  addComment: (postId: number, data: { content: string }) => pi.post<CommentType>(`/posts/${postId}/comments/`, data),
 
   // Progress
-  getProgress: () => api.get<ProgressChart[]>('/progress/'),
-  getProgressEntry: (id: number) => api.get<ProgressChart>(`/progress/${id}/`),
-  createProgress: (data: { weight: number; notes: string }) =>
-    api.post<ProgressChart>('/progress/', data),
-  updateProgress: (id: number, data: { weight: number; notes: string }) =>
-    api.patch<ProgressChart>(`/progress/${id}/`, data),
+  getProgress: () => api.get<ProgressChartType[]>('/progress/'),
+  getProgressEntry: (id: number) => api.get<ProgressChartType>(`/progress/${id}/`),
+  createProgress: (data: { weight: number; notes: string }) => api.post<ProgressChartType>('/progress/', data),
+  updateProgress: (id: number, data: { weight: number; notes: string }) => api.patch<ProgressChartType>(`/progress/${id}/`, data),
   deleteProgress: (id: number) => api.delete(`/progress/${id}/`),
 };

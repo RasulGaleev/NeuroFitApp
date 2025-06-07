@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { apiService } from '../services/api';
-import { Post, Comment } from '../types';
+import { Post, Comment } from '../types/blog.ts';
 import { Heart, MessageCircle, Trash2, Edit2 } from 'lucide-react';
 
 const Blog: React.FC = () => {

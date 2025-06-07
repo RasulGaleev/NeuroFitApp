@@ -1,3 +1,9 @@
 export interface CoachGenerateType {
-  messages: Array<{ role: string; content: string }>;
+  messages: Array<MessageType>;
+}
+
+export interface MessageType {
+  role: string;
+  content: string;
+  formattedContent?: string;
 }

@@ -11,7 +11,7 @@ const Register = () => {
   const [showBiometrics, setShowBiometrics] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  const { register } = useAuth();
+  const { register, login } = useAuth();
 
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
@@ -24,6 +24,7 @@ const Register = () => {
   const [height, setHeight] = useState('');
   const [goal, setGoal] = useState<TrainingGoal>('general_fitness');
   const [has_equipment, setHasEquipment] = useState(false);
+  const [fitness_level, setFitnessLevel] = useState<'beginner' | 'intermediate' | 'advanced'>('beginner');
 
   const handleInitialRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,11 +33,13 @@ const Register = () => {
       return;
     }
     try {
-      await register(username, email, password);
+      await register(username, email, password, password2);
+      await login(username, password);
       setShowBiometrics(true);
       toast.success('Регистрация успешна! Теперь давайте настроим ваш профиль.');
+      setError('')
     } catch (error: any) {
-      setError(error.response?.data?.password || 'Ошибка при регистрации');
+      setError(error.response?.data?.password || error.response?.data?.password2 || 'Ошибка при регистрации');
     }
   };
 
@@ -49,7 +52,8 @@ const Register = () => {
         weight: parseFloat(weight),
         height: parseInt(height),
         goal,
-        has_equipment
+        has_equipment,
+        fitness_level
       });
       toast.success('Профиль успешно обновлен!');
       navigate('/profile');
@@ -152,6 +156,21 @@ const Register = () => {
                 <option value="muscle_gain">Набор мышечной массы</option>
                 <option value="endurance">Выносливость</option>
                 <option value="general_fitness">Общая физическая подготовка</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-300">
+                Уровень подготовки
+              </label>
+              <select
+                value={fitness_level}
+                onChange={(e) => setFitnessLevel(e.target.value as 'beginner' | 'intermediate' | 'advanced')}
+                className="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
+              >
+                <option value="beginner">Низкий</option>
+                <option value="intermediate">Средний</option>
+                <option value="advanced">Высокий</option>
               </select>
             </div>
 

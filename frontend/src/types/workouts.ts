@@ -1,11 +1,11 @@
-export interface Workout {
+export interface WorkoutType {
   id: number;
   date: string;
-  plan: Exercise[];
+  plan: ExerciseType[];
   completed: boolean;
 }
 
-export interface Exercise {
+export interface ExerciseType {
   name: string;
   sets: number;
   reps: number;
