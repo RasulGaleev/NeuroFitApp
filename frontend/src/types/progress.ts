@@ -1,12 +1,11 @@
 export interface ProgressChartType {
   id: number;
+  user: number;
   date: string;
-  weight: number;
-  height: number;
-  photo: string;
+  weight: number | null;
+  height: number | null;
+  photo: string | null;
   notes: string;
-}
-
-export interface ProgressListType {
-  results: ProgressChartType[];
+  bmi: number | null;
+  created_at: string;
 }

@@ -48,11 +48,7 @@ api.interceptors.response.use(
           });
 
           setAccessToken(data.access);
-          originalRequest.headers = {
-            ...originalRequest.headers,
-            Authorization: `Bearer ${data.access}`,
-          };
-
+          originalRequest.headers.Authorization = `Bearer ${data.access}`;
           return api(originalRequest);
         } catch (refreshError) {
           clearTokens();
@@ -101,12 +97,12 @@ export const apiService = {
 
   // Comments
   getComments: (postId: number) => api.get<CommentType[]>(`/posts/${postId}/comments/`),
-  addComment: (postId: number, data: { content: string }) => pi.post<CommentType>(`/posts/${postId}/comments/`, data),
+  addComment: (postId: number, data: { content: string }) => api.post<CommentType>(`/posts/${postId}/comments/`, data),
 
   // Progress
   getProgress: () => api.get<ProgressChartType[]>('/progress/'),
-  getProgressEntry: (id: number) => api.get<ProgressChartType>(`/progress/${id}/`),
-  createProgress: (data: { weight: number; notes: string }) => api.post<ProgressChartType>('/progress/', data),
-  updateProgress: (id: number, data: { weight: number; notes: string }) => api.patch<ProgressChartType>(`/progress/${id}/`, data),
+  getProgressAll: () => api.get<ProgressChartType[]>('/progress/all/'),
+  getLatestProgress: () => api.get<ProgressChartType>('/progress/latest/'),
+  createProgress: (data: FormData) => api.post<ProgressChartType>('/progress/', data),
   deleteProgress: (id: number) => api.delete(`/progress/${id}/`),
 };

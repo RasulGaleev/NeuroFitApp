@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { apiService } from '../services/api';
-import { Workout } from '../types/workouts';
+import { WorkoutType, ExerciseType } from '../types/workouts';
 import { Check, RefreshCw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const Workouts: React.FC = () => {
-  const [workout, setWorkout] = useState<Workout | null>(null);
+  const [workout, setWorkout] = useState<WorkoutType | null>(null);
   const [loading, setLoading] = useState(true);
   const [notification, setNotification] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -29,7 +29,7 @@ const Workouts: React.FC = () => {
       }
 
       const response = await apiService.getLatestWorkout();
-      const latestWorkout: Workout = response.data;
+      const latestWorkout: WorkoutType = response.data;
 
       if (!latestWorkout || shouldGenerateNewWorkout(latestWorkout.date)) {
         await handleGenerate();
@@ -87,7 +87,7 @@ const Workouts: React.FC = () => {
         return;
       }
       await apiService.completeWorkout(workout.id);
-      setWorkout(prev => (prev ? { ...prev, completed: true } : prev));
+      setWorkout((prev: WorkoutType | null) => (prev ? { ...prev, completed: true } : prev));
       setNotification('Тренировка успешно выполнена!');
       setTimeout(() => setNotification(null), 3000);
     } catch (error) {
@@ -113,18 +113,23 @@ const Workouts: React.FC = () => {
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-100">Тренировка на сегодня</h1>
+
           {workout?.completed ? (
-            <div className="text-green-500 font-medium flex items-center gap-2">
-              <Check className="w-5 h-5" />
-              Тренировка выполнена
-              <span className="text-gray-400 text-sm">(Следующая тренировка будет доступна завтра)</span>
+            <div className="text-green-500 font-medium flex flex-col items-end">
+        <span className="flex items-center gap-2">
+          <Check className="w-5 h-5"/>
+          Тренировка выполнена
+        </span>
+              <span className="text-gray-400 text-sm mt-1">
+          Следующая тренировка будет доступна завтра
+        </span>
             </div>
           ) : (
             <button
               onClick={handleGenerate}
               className="bg-yellow-500 text-gray-900 px-4 py-2 rounded-md hover:bg-yellow-400 transition flex items-center gap-2"
             >
-              <RefreshCw className="w-5 h-5" />
+              <RefreshCw className="w-5 h-5"/>
               Сгенерировать
             </button>
           )}
@@ -133,23 +138,22 @@ const Workouts: React.FC = () => {
         {workout ? (
           <div className="bg-gray-800 rounded-lg p-6 shadow-lg border border-gray-700">
             <div className="flex justify-between items-start mb-4">
-              <div>
-                <h2 className="text-xl font-semibold text-gray-100 mb-2">
-                  {new Date(workout.date).toLocaleDateString()}
-                </h2>
-              </div>
+              <h2 className="text-xl font-semibold text-gray-100 mb-2">
+                {workout.title}
+              </h2>
+
               {!workout.completed && (
                 <button
                   onClick={handleComplete}
                   className="bg-green-500 text-white p-2 rounded-md hover:bg-green-600 transition"
                 >
-                  <Check className="w-5 h-5" />
+                  <Check className="w-5 h-5"/>
                 </button>
               )}
             </div>
 
             <div className="space-y-3">
-              {workout.plan.map((exercise, index) => (
+              {workout.plan.map((exercise: ExerciseType, index: number) => (
                 <div
                   key={index}
                   className="bg-gray-700 rounded-md p-3 text-gray-100"

@@ -1,6 +1,7 @@
 export interface WorkoutType {
   id: number;
   date: string;
+  title: string;
   plan: ExerciseType[];
   completed: boolean;
 }

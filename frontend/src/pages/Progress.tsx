@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { apiService } from '../services/api';
-import { ProgressChartType } from '../types/blog.ts';
+import { ProgressChartType } from '../types/progress';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -12,7 +12,7 @@ import {
   Tooltip,
   Legend
 } from 'chart.js';
-import { Plus, Trash2, Upload } from 'lucide-react';
+import { Plus, Trash2, Upload, ChevronDown, ChevronUp } from 'lucide-react';
 
 ChartJS.register(
   CategoryScale,
@@ -31,19 +31,41 @@ const Progress: React.FC = () => {
   const [height, setHeight] = useState('');
   const [photo, setPhoto] = useState<File | null>(null);
   const [notes, setNotes] = useState('');
+  const [expandedDates, setExpandedDates] = useState<{ [key: string]: boolean }>({});
 
   useEffect(() => {
     fetchProgress();
+    fetchLatestProgress();
   }, []);
 
   const fetchProgress = async () => {
     try {
-      const response = await apiService.getProgress();
-      setProgress(response.data.results || []);
+      const response = await apiService.getProgressAll();
+      setProgress(response.data);
+      // Инициализируем состояние для всех дат как свернутые
+      const dates = response.data.reduce((acc, entry) => {
+        acc[entry.date] = false;
+        return acc;
+      }, {} as { [key: string]: boolean });
+      setExpandedDates(dates);
     } catch (error) {
       console.error('Ошибка при загрузке прогресса:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchLatestProgress = async () => {
+    try {
+      const response = await apiService.getLatestProgress();
+      if (response.data.weight) {
+        setWeight(response.data.weight.toString());
+      }
+      if (response.data.height) {
+        setHeight(response.data.height.toString());
+      }
+    } catch (error) {
+      console.error('Ошибка при загрузке последних данных:', error);
     }
   };
 
@@ -52,6 +74,8 @@ const Progress: React.FC = () => {
     if (!weight || !height) return;
 
     const formData = new FormData();
+    const today = new Date().toISOString().split('T')[0];
+    formData.append('date', today);
     formData.append('weight', weight);
     formData.append('height', height);
     formData.append('notes', notes);
@@ -60,8 +84,8 @@ const Progress: React.FC = () => {
     }
 
     try {
-      const response = await apiService.createProgress(formData);
-      setProgress([...progress, response.data]);
+      await apiService.createProgress(formData);
+      await fetchProgress();
       setWeight('');
       setHeight('');
       setPhoto(null);
@@ -74,7 +98,7 @@ const Progress: React.FC = () => {
   const handleDelete = async (id: number) => {
     try {
       await apiService.deleteProgress(id);
-      setProgress(progress.filter(p => p.id !== id));
+      await fetchProgress();
     } catch (error) {
       console.error('Ошибка при удалении записи:', error);
     }
@@ -95,6 +119,13 @@ const Progress: React.FC = () => {
         data: progress.map(p => p.height),
         borderColor: 'rgb(59, 130, 246)',
         backgroundColor: 'rgba(59, 130, 246, 0.5)',
+        tension: 0.4
+      },
+      {
+        label: 'ИМТ',
+        data: progress.map(p => p.bmi),
+        borderColor: 'rgb(16, 185, 129)',
+        backgroundColor: 'rgba(16, 185, 129, 0.5)',
         tension: 0.4
       }
     ]
@@ -135,6 +166,13 @@ const Progress: React.FC = () => {
     }
   };
 
+  const toggleDate = (date: string) => {
+    setExpandedDates(prev => ({
+      ...prev,
+      [date]: !prev[date]
+    }));
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
@@ -167,21 +205,25 @@ const Progress: React.FC = () => {
                 <label className="block text-gray-300 mb-2">Вес (кг)</label>
                 <input
                   type="number"
+                  required
+                  step="0.1"
+                  min="20"
+                  max="200"
                   value={weight}
                   onChange={(e) => setWeight(e.target.value)}
                   className="w-full p-3 bg-gray-700 text-gray-100 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                  step="0.1"
-                  required
                 />
               </div>
               <div>
                 <label className="block text-gray-300 mb-2">Рост (см)</label>
                 <input
                   type="number"
+                  required
+                  min="50"
+                  max="250"
                   value={height}
                   onChange={(e) => setHeight(e.target.value)}
                   className="w-full p-3 bg-gray-700 text-gray-100 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                  required
                 />
               </div>
             </div>
@@ -230,35 +272,68 @@ const Progress: React.FC = () => {
         </div>
 
         <div className="space-y-4">
-          {progress.map((entry) => (
-            <div
-              key={entry.id}
-              className="bg-gray-800 rounded-lg p-6 shadow-lg border border-gray-700"
-            >
-              <div className="flex justify-between items-start">
-                <div>
-                  <div className="text-2xl font-semibold text-gray-100 mb-2">
-                    {entry.weight} кг / {entry.height} см
-                  </div>
-                  {entry.photo && (
-                    <img
-                      src={entry.photo}
-                      alt="Progress"
-                      className="w-32 h-32 object-cover rounded-md mb-2"
-                    />
-                  )}
-                  <div className="text-gray-300">{entry.notes}</div>
-                  <div className="text-sm text-gray-400 mt-2">
-                    {new Date(entry.date).toLocaleDateString()}
-                  </div>
+          {Object.entries(progress.reduce((acc, entry) => {
+            const date = entry.date;
+            if (!acc[date]) {
+              acc[date] = [];
+            }
+            acc[date].push(entry);
+            return acc;
+          }, {} as { [key: string]: ProgressChartType[] }))
+          .sort(([dateA], [dateB]) => new Date(dateB).getTime() - new Date(dateA).getTime())
+          .map(([date, entries]) => (
+            <div key={date} className="bg-gray-800 rounded-lg p-6 shadow-lg border border-gray-700">
+              <div 
+                className="flex justify-between items-center cursor-pointer"
+                onClick={() => toggleDate(date)}
+              >
+                <div className="text-xl font-semibold text-gray-100">
+                  {new Date(date).toLocaleDateString('ru-RU')}
                 </div>
-                <button
-                  onClick={() => handleDelete(entry.id)}
-                  className="text-gray-400 hover:text-red-500 transition"
-                >
-                  <Trash2 className="w-5 h-5" />
+                <button className="text-gray-400 hover:text-yellow-500 transition">
+                  {expandedDates[date] ? (
+                    <ChevronUp className="w-6 h-6" />
+                  ) : (
+                    <ChevronDown className="w-6 h-6" />
+                  )}
                 </button>
               </div>
+              {expandedDates[date] && (
+                <div className="mt-4 space-y-4">
+                  {entries.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).map((entry) => (
+                    <div key={entry.id} className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-4 mb-4">
+                          <div className="text-2xl font-semibold text-gray-100">
+                            {entry.weight} кг / {entry.height} см
+                          </div>
+                          {entry.bmi && (
+                            <div className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm">
+                              ИМТ: {entry.bmi}
+                            </div>
+                          )}
+                        </div>
+                        {entry.photo && (
+                          <img
+                            src={`http://localhost:8000${entry.photo}`}
+                            alt="Progress"
+                            className="w-32 h-32 object-cover rounded-md mb-4"
+                          />
+                        )}
+                        {entry.notes && (
+                          <div className="text-gray-300 mb-4">{entry.notes}</div>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => handleDelete(entry.id)}
+                        className="text-gray-400 hover:text-red-500 transition ml-4"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           ))}
         </div>

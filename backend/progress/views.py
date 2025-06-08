@@ -34,30 +34,32 @@ class ProgressViewSet(viewsets.ModelViewSet):
         progress = self.get_queryset().first()
         if progress:
             return Response({
+                "id": progress.id,
                 "weight": progress.weight,
                 "height": progress.height,
                 "date": progress.date,
                 "photo": progress.photo.url if progress.photo else None,
-                "notes": progress.notes
+                "notes": progress.notes,
+                "bmi": progress.calculate_bmi(),
+                "created_at": progress.created_at
             })
         return Response({"message": "Нет сохранённых данных о прогрессе."}, status=404)
 
     @action(detail=False, methods=['get'])
-    def history(self, request):
-        queryset = self.get_queryset().order_by('date')
-        data = {}
+    def all(self, request):
+        queryset = self.get_queryset().order_by('-date')
+        data = []
 
         for progress in queryset:
-            date_str = progress.date.strftime('%Y-%m-%d')
-            if date_str not in data:
-                data[date_str] = []
-
-            data[date_str].append({
+            data.append({
                 "id": progress.id,
+                "date": progress.date,
                 "weight": progress.weight,
                 "height": progress.height,
+                "bmi": progress.calculate_bmi(),
                 "photo": progress.photo.url if progress.photo else None,
-                "notes": progress.notes
+                "notes": progress.notes,
+                "created_at": progress.created_at
             })
 
         return Response(data)

@@ -39,6 +39,7 @@ class WorkoutViewSet(viewsets.ModelViewSet):
         if workout:
             return Response({
                 "id": workout.id,
+                "title": workout.title,
                 "date": workout.date,
                 "plan": workout.plan,
                 "completed": workout.completed
@@ -52,10 +53,12 @@ class WorkoutViewSet(viewsets.ModelViewSet):
             data = json.loads(result)
             workout = Workout.objects.create(
                 user=request.user,
-                plan=data
+                title=data['title'],
+                plan=data['exercises']
             )
             return Response({
                 "id": workout.id,
+                "title": workout.title,
                 "date": workout.date,
                 "plan": workout.plan,
                 "completed": workout.completed
