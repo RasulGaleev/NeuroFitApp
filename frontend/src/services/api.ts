@@ -5,7 +5,7 @@ import { RefreshTokenType, TokenType } from '../types/token.ts';
 import { WorkoutType } from '../types/workouts';
 import { NutritionType } from '../types/nutrition';
 import { ProgressChartType } from '../types/progress';
-import { CommentType, PostType } from "../types/blog.ts";
+import { CommentType, PostType, PaginatedResponse } from "../types/blog.ts";
 
 
 const API_BASE_URL = 'http://localhost:8000/api';
@@ -88,16 +88,18 @@ export const apiService = {
   getLatestNutritionPlan: () => api.get<NutritionType>('/nutrition/latest/'),
 
   // Posts
-  getPosts: () => api.get<PostType[]>('/posts/'),
-  getPost: (id: number) => api.get<PostType>(`/posts/${id}/`),
-  createPost: (data: Partial<PostType>) => api.post<PostType>('/posts/', data),
-  updatePost: (id: number, data: Partial<PostType>) => api.patch<PostType>(`/posts/${id}/`, data),
-  deletePost: (id: number) => api.delete(`/posts/${id}/`),
-  likePost: (id: number) => api.post(`/posts/${id}/like/`),
+  getPosts: () => api.get<PaginatedResponse<PostType>>('/blog/posts/'),
+  getPost: (id: number) => api.get<PostType>(`/blog/posts/${id}/`),
+  createPost: (data: FormData) => api.post<PostType>('/blog/posts/', data),
+  updatePost: (id: number, data: Partial<PostType>) => api.patch<PostType>(`/blog/posts/${id}/`, data),
+  deletePost: (id: number) => api.delete(`/blog/posts/${id}/`),
+
+  // Likes
+  likePost: (id: number) => api.post(`/blog/posts/${id}/likes/`),
 
   // Comments
-  getComments: (postId: number) => api.get<CommentType[]>(`/posts/${postId}/comments/`),
-  addComment: (postId: number, data: { content: string }) => api.post<CommentType>(`/posts/${postId}/comments/`, data),
+  getComments: (postId: number) => api.get<PaginatedResponse<CommentType>>(`/blog/posts/${postId}/comments/`),
+  addComment: (postId: number, data: { content: string }) => api.post<CommentType>(`/blog/posts/${postId}/comments/`, data),
 
   // Progress
   getProgress: () => api.get<ProgressChartType[]>('/progress/'),
