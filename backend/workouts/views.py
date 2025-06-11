@@ -49,7 +49,10 @@ class WorkoutViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['post'])
     def generate(self, request):
         try:
-            result = generate_answer(messages=[get_system_message(request.user, "workout")], temperature=0.2)
+            result = generate_answer(
+                messages=[get_system_message(request.user, "workout")],
+                temperature=0.4
+            )
             data = json.loads(result)
             workout = Workout.objects.create(
                 user=request.user,

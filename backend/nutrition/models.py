@@ -9,3 +9,7 @@ class Nutrition(models.Model):
     meals = models.JSONField()
     calories = models.IntegerField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Питание'
+        verbose_name_plural = 'Питание'

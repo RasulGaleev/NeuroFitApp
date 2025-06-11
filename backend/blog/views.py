@@ -1,5 +1,6 @@
 from django_filters import rest_framework as filters
 from rest_framework import viewsets, status
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -25,8 +26,19 @@ class PostViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return Post.objects.select_related('user').prefetch_related('comments', 'likes')
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
+
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+    def destroy(self, request, *args, **kwargs):
+        post = self.get_object()
+        if post.user != request.user:
+            raise PermissionDenied("Вы не можете удалить чужой пост")
+        return super().destroy(request, *args, **kwargs)
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -37,6 +49,11 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return Comment.objects.filter(post_id=self.kwargs['post_pk']).select_related('user')
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
 
     def create(self, request, *args, **kwargs):
         post_id = self.kwargs.get('post_pk')
@@ -54,6 +71,12 @@ class CommentViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(comment)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+    def destroy(self, request, *args, **kwargs):
+        comment = self.get_object()
+        if comment.user != request.user:
+            raise PermissionDenied("Вы не можете удалить чужой комментарий")
+        return super().destroy(request, *args, **kwargs)
+
 
 class LikeViewSet(viewsets.ModelViewSet):
     serializer_class = LikeSerializer
@@ -62,12 +85,26 @@ class LikeViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return Like.objects.filter(post_id=self.kwargs['post_pk']).select_related('user')
 
-    class LikeViewSet(viewsets.ModelViewSet):
-        serializer_class = LikeSerializer
-        permission_classes = [IsAuthenticated]
+    def create(self, request, *args, **kwargs):
+        post_id = self.kwargs.get('post_pk')
+        post = Post.objects.get(id=post_id)
 
-        def get_queryset(self):
-            return Like.objects.filter(post_id=self.kwargs['post_pk']).select_related('user')
+        like, created = Like.objects.get_or_create(
+            post=post,
+            user=request.user,
+            defaults={'user': request.user}
+        )
 
-        def perform_create(self, serializer):
-            serializer.save(user=self.request.user, post_id=self.kwargs['post_pk'])
+        if not created:
+            like.delete()
+            return Response({
+                "status": "unliked",
+                "likes_count": post.likes.count(),
+                "is_liked": False
+            }, status=status.HTTP_200_OK)
+
+        return Response({
+            "status": "liked",
+            "likes_count": post.likes.count(),
+            "is_liked": True
+        }, status=status.HTTP_201_CREATED)

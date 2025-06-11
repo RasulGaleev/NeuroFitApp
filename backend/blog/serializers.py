@@ -1,15 +1,23 @@
 from rest_framework import serializers
-from users.serializers import UserSerializer
+
 from .models import Post, Comment, Like
 
 
 class LikeSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
+    user = serializers.SerializerMethodField()
+    created_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)
 
     class Meta:
         model = Like
         fields = ['id', 'user', 'created_at']
         read_only_fields = ['user', 'created_at']
+
+    def get_user(self, obj):
+        return {
+            'id': obj.user.id,
+            'username': obj.user.username,
+            'avatar': obj.user.avatar.url if obj.user.avatar else None
+        }
 
 
 class CommentSerializer(serializers.ModelSerializer):

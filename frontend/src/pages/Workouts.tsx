@@ -29,32 +29,15 @@ const Workouts: React.FC = () => {
       }
 
       const response = await apiService.getLatestWorkout();
-      const latestWorkout: WorkoutType = response.data;
-
-      if (!latestWorkout || shouldGenerateNewWorkout(latestWorkout.date)) {
-        await handleGenerate();
-      } else {
-        setWorkout(latestWorkout);
-      }
+      setWorkout(response.data);
     } catch (error: any) {
-      if (error.response?.status === 404) {
-        // Нет тренировки — генерируем новую
-        await handleGenerate();
-      } else {
-        console.error('Ошибка при загрузке тренировки:', error);
-        if (error.response?.status === 401) {
-          navigate('/login');
-        }
+      console.error('Ошибка при загрузке тренировки:', error);
+      if (error.response?.status === 401) {
+        navigate('/login');
       }
     } finally {
       setLoading(false);
     }
-  };
-
-  const shouldGenerateNewWorkout = (planDate: string) => {
-    const planDay = new Date(planDate).toDateString();
-    const today = new Date().toDateString();
-    return planDay !== today;
   };
 
   const handleGenerate = async () => {
@@ -68,6 +51,8 @@ const Workouts: React.FC = () => {
 
       const response = await apiService.generateWorkout();
       setWorkout(response.data);
+      setNotification('Тренировка успешно сгенерирована!');
+      setTimeout(() => setNotification(null), 3000);
     } catch (error: any) {
       console.error('Ошибка при генерации тренировки:', error);
       if (error.response?.status === 401) {
@@ -104,30 +89,30 @@ const Workouts: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 py-12 px-4">
+    <div className="min-h-screen bg-gray-900 py-8 sm:py-12 px-4">
       {notification && (
-        <div className="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-md shadow-lg z-50">
+        <div className="fixed top-4 right-4 bg-green-500 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-md shadow-lg z-50 text-sm sm:text-base">
           {notification}
         </div>
       )}
       <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-100">Тренировка на сегодня</h1>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-100">Тренировка на сегодня</h1>
 
           {workout?.completed ? (
             <div className="text-green-500 font-medium flex flex-col items-end">
-        <span className="flex items-center gap-2">
-          <Check className="w-5 h-5"/>
-          Тренировка выполнена
-        </span>
-              <span className="text-gray-400 text-sm mt-1">
-          Следующая тренировка будет доступна завтра
-        </span>
+              <span className="flex items-center gap-2 text-sm sm:text-base">
+                <Check className="w-5 h-5"/>
+                Тренировка выполнена
+              </span>
+              <span className="text-gray-400 text-xs sm:text-sm mt-1">
+                Следующая тренировка будет доступна завтра
+              </span>
             </div>
           ) : (
             <button
               onClick={handleGenerate}
-              className="bg-yellow-500 text-gray-900 px-4 py-2 rounded-md hover:bg-yellow-400 transition flex items-center gap-2"
+              className="w-full sm:w-auto bg-yellow-500 text-gray-900 px-4 py-2 rounded-md hover:bg-yellow-400 transition flex items-center justify-center gap-2"
             >
               <RefreshCw className="w-5 h-5"/>
               Сгенерировать
@@ -136,9 +121,9 @@ const Workouts: React.FC = () => {
         </div>
 
         {workout ? (
-          <div className="bg-gray-800 rounded-lg p-6 shadow-lg border border-gray-700">
+          <div className="bg-gray-800 rounded-lg p-4 sm:p-6 shadow-lg border border-gray-700">
             <div className="flex justify-between items-start mb-4">
-              <h2 className="text-xl font-semibold text-gray-100 mb-2">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-100 mb-2">
                 {workout.title}
               </h2>
 
@@ -158,11 +143,11 @@ const Workouts: React.FC = () => {
                   key={index}
                   className="bg-gray-700 rounded-md p-3 text-gray-100"
                 >
-                  <div className="font-medium">{exercise.name}</div>
-                  <div className="text-sm text-gray-300 mb-2">
+                  <div className="font-medium text-sm sm:text-base">{exercise.name}</div>
+                  <div className="text-xs sm:text-sm text-gray-300 mb-2">
                     {exercise.sets} подходов × {exercise.reps} повторений
                   </div>
-                  <div className="text-sm text-gray-400">
+                  <div className="text-xs sm:text-sm text-gray-400">
                     {exercise.description}
                   </div>
                 </div>
@@ -171,7 +156,8 @@ const Workouts: React.FC = () => {
           </div>
         ) : (
           <div className="text-gray-300 text-center py-8">
-            Нет доступной тренировки
+            <p className="text-lg sm:text-xl mb-2">Тренировка не сгенерирована</p>
+            <p className="text-sm sm:text-base text-gray-400">Нажмите кнопку "Сгенерировать" для создания новой тренировки</p>
           </div>
         )}
       </div>

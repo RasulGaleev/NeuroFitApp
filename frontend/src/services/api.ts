@@ -20,7 +20,7 @@ const clearTokens = () => {
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000
+  timeout: 36000
 });
 
 api.interceptors.request.use(
@@ -89,22 +89,19 @@ export const apiService = {
 
   // Posts
   getPosts: () => api.get<PaginatedResponse<PostType>>('/blog/posts/'),
-  getPost: (id: number) => api.get<PostType>(`/blog/posts/${id}/`),
   createPost: (data: FormData) => api.post<PostType>('/blog/posts/', data),
-  updatePost: (id: number, data: Partial<PostType>) => api.patch<PostType>(`/blog/posts/${id}/`, data),
   deletePost: (id: number) => api.delete(`/blog/posts/${id}/`),
-
-  // Likes
-  likePost: (id: number) => api.post(`/blog/posts/${id}/likes/`),
 
   // Comments
   getComments: (postId: number) => api.get<PaginatedResponse<CommentType>>(`/blog/posts/${postId}/comments/`),
   addComment: (postId: number, data: { content: string }) => api.post<CommentType>(`/blog/posts/${postId}/comments/`, data),
+  deleteComment: (postId: number, commentId: number) => api.delete(`/blog/posts/${postId}/comments/${commentId}/`),
+
+  // Likes
+  likePost: (id: number) => api.post(`/blog/posts/${id}/likes/`),
 
   // Progress
   getProgress: () => api.get<ProgressChartType[]>('/progress/'),
-  getProgressAll: () => api.get<ProgressChartType[]>('/progress/all/'),
-  getLatestProgress: () => api.get<ProgressChartType>('/progress/latest/'),
   createProgress: (data: FormData) => api.post<ProgressChartType>('/progress/', data),
   deleteProgress: (id: number) => api.delete(`/progress/${id}/`),
 };

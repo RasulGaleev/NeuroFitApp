@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { Edit, Upload } from 'lucide-react';
+import { Edit, Upload, Calendar, User, Ruler, Scale, Target, Dumbbell, Trophy } from 'lucide-react';
 import { apiService } from '../services/api';
 import { ProfileType } from '../types/user';
 
@@ -131,62 +131,61 @@ const Profile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 py-12 px-4">
-      <div className="max-w-4xl mx-auto bg-gray-800 rounded-lg shadow-lg p-6 border border-gray-700">
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center space-x-4">
-            <div
-              onClick={handleAvatarClick}
-              className="relative cursor-pointer"
-            >
-              <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-700">
-                {avatar ? (
-                  <img
-                    src={avatar}
-                    alt="Avatar"
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-yellow-500">
-                    <span className="text-3xl text-white">
-                      {user.username.charAt(0).toUpperCase()}
-                    </span>
-                  </div>
-                )}
-              </div>
-              {isEditing && (
-                <div className="absolute bottom-0 right-0 bg-yellow-500 p-1 rounded-full">
-                  <Upload className="h-4 w-4 text-white" />
+    <div className="min-h-screen bg-gray-900 py-8 sm:py-12 px-4">
+      <div className="max-w-4xl mx-auto bg-gray-800 rounded-lg shadow-lg p-4 sm:p-6 border border-gray-700">
+        <div className="flex flex-col items-center mb-6 sm:mb-8">
+          <div
+            onClick={handleAvatarClick}
+            className="relative cursor-pointer mb-4"
+          >
+            <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden bg-gray-700">
+              {avatar ? (
+                <img
+                  src={avatar}
+                  alt="Avatar"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-yellow-500">
+                  <span className="text-4xl sm:text-5xl text-white">
+                    {user.username.charAt(0).toUpperCase()}
+                  </span>
                 </div>
               )}
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleAvatarChange}
-                accept="image/*"
-                className="hidden"
-              />
             </div>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-100">{user.username}</h1>
-              <p className="text-gray-400">{user.email}</p>
-            </div>
+            {isEditing && (
+              <div className="absolute bottom-0 right-0 bg-yellow-500 p-2 rounded-full">
+                <Upload className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+              </div>
+            )}
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleAvatarChange}
+              accept="image/*"
+              className="hidden"
+            />
+          </div>
+          <div className="text-center">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-100 mb-1">{user.username}</h1>
+            <p className="text-sm sm:text-base text-gray-400">{user.email}</p>
           </div>
           <button
             onClick={() => setIsEditing(!isEditing)}
-            className="flex items-center space-x-2 text-gray-300 hover:text-yellow-500"
+            className="mt-4 flex items-center space-x-2 text-gray-300 hover:text-yellow-500 transition-colors text-sm sm:text-base"
           >
-            <Edit className="h-5 w-5" />
+            <Edit className="h-4 w-4 sm:h-5 sm:w-5" />
             <span>{isEditing ? 'Отменить' : 'Редактировать'}</span>
           </button>
         </div>
 
         {isEditing ? (
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+              <div className="space-y-4 sm:space-y-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300">
+                  <label className="block text-sm font-medium text-gray-300 mb-2 flex items-center gap-2">
+                    <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500" />
                     Дата рождения
                   </label>
                   <input
@@ -196,12 +195,13 @@ const Profile = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, date_of_birth: e.target.value })
                     }
-                    className="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
+                    className="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-yellow-500 focus:ring-yellow-500 text-sm sm:text-base"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300">
+                  <label className="block text-sm font-medium text-gray-300 mb-2 flex items-center gap-2">
+                    <User className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500" />
                     Пол
                   </label>
                   <select
@@ -209,7 +209,7 @@ const Profile = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, gender: e.target.value as 'male' | 'female' | undefined })
                     }
-                    className="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
+                    className="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-yellow-500 focus:ring-yellow-500 text-sm sm:text-base"
                   >
                     <option value="">Выберите пол</option>
                     <option value="male">Мужской</option>
@@ -218,7 +218,8 @@ const Profile = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300">
+                  <label className="block text-sm font-medium text-gray-300 mb-2 flex items-center gap-2">
+                    <Ruler className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500" />
                     Рост (см)
                   </label>
                   <input
@@ -229,12 +230,13 @@ const Profile = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, height: parseInt(e.target.value) })
                     }
-                    className="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
+                    className="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-yellow-500 focus:ring-yellow-500 text-sm sm:text-base"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300">
+                  <label className="block text-sm font-medium text-gray-300 mb-2 flex items-center gap-2">
+                    <Scale className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500" />
                     Вес (кг)
                   </label>
                   <input
@@ -246,14 +248,15 @@ const Profile = () => {
                     onChange={(e) =>
                       setFormData({...formData, weight: parseFloat(e.target.value)})
                     }
-                    className="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
+                    className="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-yellow-500 focus:ring-yellow-500 text-sm sm:text-base"
                   />
                 </div>
               </div>
 
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300">
+                  <label className="block text-sm font-medium text-gray-300 mb-2 flex items-center gap-2">
+                    <Target className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500" />
                     Цель
                   </label>
                   <select
@@ -261,7 +264,7 @@ const Profile = () => {
                     onChange={(e) =>
                       setFormData({...formData, goal: e.target.value as 'weight_loss' | 'muscle_gain' | 'endurance' | 'general_fitness' | undefined})
                     }
-                    className="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
+                    className="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-yellow-500 focus:ring-yellow-500 text-sm sm:text-base"
                   >
                     <option value="">Выберите цель</option>
                     <option value="weight_loss">Похудение</option>
@@ -272,7 +275,8 @@ const Profile = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300">
+                  <label className="block text-sm font-medium text-gray-300 mb-2 flex items-center gap-2">
+                    <Trophy className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500" />
                     Уровень подготовки
                   </label>
                   <select
@@ -280,7 +284,7 @@ const Profile = () => {
                     onChange={(e) =>
                       setFormData({...formData, fitness_level: e.target.value as 'beginner' | 'intermediate' | 'advanced' | undefined})
                     }
-                    className="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
+                    className="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-yellow-500 focus:ring-yellow-500 text-sm sm:text-base"
                   >
                     <option value="">Выберите уровень</option>
                     <option value="beginner">Начинающий</option>
@@ -299,7 +303,8 @@ const Profile = () => {
                     }
                     className="h-4 w-4 text-yellow-500 focus:ring-yellow-500 border-gray-600 rounded bg-gray-700"
                   />
-                  <label htmlFor="has_equipment" className="ml-2 block text-sm text-gray-300">
+                  <label htmlFor="has_equipment" className="ml-2 block text-sm text-gray-300 flex items-center gap-2">
+                    <Dumbbell className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500" />
                     У меня есть спортивное оборудование
                   </label>
                 </div>
@@ -308,44 +313,59 @@ const Profile = () => {
 
             <button
               type="submit"
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
+              className="w-full flex justify-center py-2 sm:py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-colors"
             >
               Сохранить изменения
             </button>
           </form>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+            <div className="space-y-4 sm:space-y-6">
               <div>
-                <h3 className="text-sm font-medium text-gray-300">Дата рождения</h3>
-                <p className="mt-1 text-lg text-gray-100">
+                <h3 className="text-sm font-medium text-gray-300 flex items-center gap-2">
+                  <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500" />
+                  Дата рождения
+                </h3>
+                <p className="mt-1 text-base sm:text-lg text-gray-100">
                   {user.profile?.date_of_birth || 'Не указано'}
                 </p>
               </div>
               <div>
-                <h3 className="text-sm font-medium text-gray-300">Пол</h3>
-                <p className="mt-1 text-lg text-gray-100">
+                <h3 className="text-sm font-medium text-gray-300 flex items-center gap-2">
+                  <User className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500" />
+                  Пол
+                </h3>
+                <p className="mt-1 text-base sm:text-lg text-gray-100">
                   {user.profile?.gender === 'male' ? 'Мужской' : user.profile?.gender === 'female' ? 'Женский' : 'Не указано'}
                 </p>
               </div>
               <div>
-                <h3 className="text-sm font-medium text-gray-300">Рост (см)</h3>
-                <p className="mt-1 text-lg text-gray-100">
+                <h3 className="text-sm font-medium text-gray-300 flex items-center gap-2">
+                  <Ruler className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500" />
+                  Рост (см)
+                </h3>
+                <p className="mt-1 text-base sm:text-lg text-gray-100">
                   {user.profile?.height || 'Не указано'}
                 </p>
               </div>
               <div>
-                <h3 className="text-sm font-medium text-gray-300">Вес (кг)</h3>
-                <p className="mt-1 text-lg text-gray-100">
+                <h3 className="text-sm font-medium text-gray-300 flex items-center gap-2">
+                  <Scale className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500" />
+                  Вес (кг)
+                </h3>
+                <p className="mt-1 text-base sm:text-lg text-gray-100">
                   {user.profile?.weight || 'Не указано'}
                 </p>
               </div>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               <div>
-                <h3 className="text-sm font-medium text-gray-300">Цель</h3>
-                <p className="mt-1 text-lg text-gray-100">
+                <h3 className="text-sm font-medium text-gray-300 flex items-center gap-2">
+                  <Target className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500" />
+                  Цель
+                </h3>
+                <p className="mt-1 text-base sm:text-lg text-gray-100">
                   {user.profile?.goal === 'weight_loss'
                     ? 'Похудение'
                     : user.profile?.goal === 'muscle_gain'
@@ -358,8 +378,11 @@ const Profile = () => {
                 </p>
               </div>
               <div>
-                <h3 className="text-sm font-medium text-gray-300">Уровень подготовки</h3>
-                <p className="mt-1 text-lg text-gray-100">
+                <h3 className="text-sm font-medium text-gray-300 flex items-center gap-2">
+                  <Trophy className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500" />
+                  Уровень подготовки
+                </h3>
+                <p className="mt-1 text-base sm:text-lg text-gray-100">
                   {user.profile?.fitness_level === 'beginner'
                     ? 'Начинающий'
                     : user.profile?.fitness_level === 'intermediate'
@@ -370,8 +393,11 @@ const Profile = () => {
                 </p>
               </div>
               <div>
-                <h3 className="text-sm font-medium text-gray-300">Спортивное оборудование</h3>
-                <p className="mt-1 text-lg text-gray-100">
+                <h3 className="text-sm font-medium text-gray-300 flex items-center gap-2">
+                  <Dumbbell className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500" />
+                  Спортивное оборудование
+                </h3>
+                <p className="mt-1 text-base sm:text-lg text-gray-100">
                   {user.profile?.has_equipment ? 'Есть' : 'Нет'}
                 </p>
               </div>

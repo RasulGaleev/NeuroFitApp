@@ -22,7 +22,7 @@ class CoachesGenerateView(generics.CreateAPIView):
         full_messages = [system_message] + messages
 
         try:
-            answer = generate_answer(full_messages)
+            answer = generate_answer(messages=full_messages)
             return Response({"answer": answer}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

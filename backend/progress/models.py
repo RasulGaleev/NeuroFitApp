@@ -18,9 +18,6 @@ class ProgressChart(models.Model):
             return round(round(self.weight) / (height_in_meters ** 2), 2)
         return None
 
-    def __str__(self):
-        return f"{self.user.username} - {self.date}"
-
     class Meta:
         verbose_name = 'Прогресс'
         verbose_name_plural = 'Прогресс'

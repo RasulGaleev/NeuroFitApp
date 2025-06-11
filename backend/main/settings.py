@@ -1,7 +1,8 @@
-import environ
 from datetime import timedelta
 from pathlib import Path
 
+import environ
+import httpx
 from openai import OpenAI
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -9,7 +10,6 @@ ENV_FILE = BASE_DIR / '.env'
 
 env = environ.Env()
 environ.Env.read_env(ENV_FILE)
-
 
 SECRET_KEY = env('SECRET_KEY')
 DEBUG = env.bool('DEBUG', default=True)
@@ -147,5 +147,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'users.CustomUser'
 
-OPENAI_CLIENT = OpenAI(api_key=env('OPENAI_API_KEY'))
-
+OPENAI_MODEL = env('OPENAI_MODEL')
+OPENAI_CLIENT = OpenAI(
+    api_key=env('OPENAI_API_KEY'),
+    http_client=httpx.Client(
+        proxy=f"http://{env('PROXY_LOGIN')}:{env('PROXY_PASSWORD')}@{env('PROXY_HOST')}:{env('PROXY_PORT')}",
+        transport=httpx.HTTPTransport(local_address="0.0.0.0")
+    )
+)

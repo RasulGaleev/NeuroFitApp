@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 const Nutrition: React.FC = () => {
   const [nutrition, setNutrition] = useState<NutritionType | null>(null);
   const [loading, setLoading] = useState(true);
+  const [notification, setNotification] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -28,31 +29,15 @@ const Nutrition: React.FC = () => {
       }
 
       const response = await apiService.getLatestNutritionPlan();
-      const latestPlan: NutritionType = response.data;
-
-      if (!latestPlan || shouldGenerateNewPlan(latestPlan.date)) {
-        await handleGenerate();
-      } else {
-        setNutrition(latestPlan);
-      }
+      setNutrition(response.data);
     } catch (error: any) {
-      if (error.response?.status === 404) {
-        await handleGenerate();
-      } else {
-        console.error('Ошибка при загрузке плана питания:', error);
-        if (error.response?.status === 401) {
-          navigate('/login');
-        }
+      console.error('Ошибка при загрузке плана питания:', error);
+      if (error.response?.status === 401) {
+        navigate('/login');
       }
     } finally {
       setLoading(false);
     }
-  };
-
-  const shouldGenerateNewPlan = (planDate: string) => {
-    const planDay = new Date(planDate).toDateString();
-    const today = new Date().toDateString();
-    return planDay !== today;
   };
 
   const handleGenerate = async () => {
@@ -66,6 +51,8 @@ const Nutrition: React.FC = () => {
 
       const response = await apiService.generateNutritionPlan();
       setNutrition(response.data);
+      setNotification('План питания успешно сгенерирован!');
+      setTimeout(() => setNotification(null), 3000);
     } catch (error: any) {
       console.error('Ошибка при генерации плана питания:', error);
       if (error.response?.status === 401) {
@@ -86,6 +73,11 @@ const Nutrition: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-900 py-12 px-4">
+      {notification && (
+        <div className="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-md shadow-lg z-50">
+          {notification}
+        </div>
+      )}
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-100">План питания</h1>
@@ -103,9 +95,8 @@ const Nutrition: React.FC = () => {
             <div className="flex justify-between items-start mb-4">
               <div>
                 <h2 className="text-xl font-semibold text-gray-100 mb-2">
-                  {new Date(nutrition.date).toLocaleDateString()}
+                  Общая калорийность: {nutrition.calories} ккал
                 </h2>
-                <p className="text-gray-300">Общая калорийность: {nutrition.calories} ккал</p>
               </div>
             </div>
 
@@ -135,7 +126,8 @@ const Nutrition: React.FC = () => {
           </div>
         ) : (
           <div className="text-gray-300 text-center py-8">
-            Нет доступного плана питания
+            <p className="text-xl mb-2">План питания не сгенерирован</p>
+            <p className="text-gray-400">Нажмите кнопку "Сгенерировать" для создания нового плана</p>
           </div>
         )}
       </div>

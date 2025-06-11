@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { apiService } from '../services/api';
 import { ProgressChartType } from '../types/progress';
+import { ProfileType } from '../types/user';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -13,6 +14,7 @@ import {
   Legend
 } from 'chart.js';
 import { Plus, Trash2, Upload, ChevronDown, ChevronUp } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 
 ChartJS.register(
   CategoryScale,
@@ -32,40 +34,38 @@ const Progress: React.FC = () => {
   const [photo, setPhoto] = useState<File | null>(null);
   const [notes, setNotes] = useState('');
   const [expandedDates, setExpandedDates] = useState<{ [key: string]: boolean }>({});
+  const [profile, setProfile] = useState<ProfileType | null>(null);
 
   useEffect(() => {
     fetchProgress();
-    fetchLatestProgress();
+    fetchProfile();
   }, []);
+
+  const fetchProfile = async () => {
+    try {
+      const response = await apiService.getProfile();
+      setProfile(response.data);
+      if (response.data.weight) setWeight(response.data.weight.toString());
+      if (response.data.height) setHeight(response.data.height.toString());
+    } catch (error) {
+      console.error('Ошибка при загрузке профиля:', error);
+    }
+  };
 
   const fetchProgress = async () => {
     try {
-      const response = await apiService.getProgressAll();
-      setProgress(response.data);
-      // Инициализируем состояние для всех дат как свернутые
-      const dates = response.data.reduce((acc, entry) => {
+      const response = await apiService.getProgress();
+      const progressData = Array.isArray(response.data) ? response.data : (response.data as { results: ProgressChartType[] }).results;
+      setProgress(progressData);
+      const dates = progressData.reduce((acc: { [key: string]: boolean }, entry: ProgressChartType) => {
         acc[entry.date] = false;
         return acc;
-      }, {} as { [key: string]: boolean });
+      }, {});
       setExpandedDates(dates);
     } catch (error) {
       console.error('Ошибка при загрузке прогресса:', error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const fetchLatestProgress = async () => {
-    try {
-      const response = await apiService.getLatestProgress();
-      if (response.data.weight) {
-        setWeight(response.data.weight.toString());
-      }
-      if (response.data.height) {
-        setHeight(response.data.height.toString());
-      }
-    } catch (error) {
-      console.error('Ошибка при загрузке последних данных:', error);
     }
   };
 
@@ -85,22 +85,35 @@ const Progress: React.FC = () => {
 
     try {
       await apiService.createProgress(formData);
+      await apiService.updateProfile({ 
+        weight: parseFloat(weight), 
+        height: parseInt(height),
+        date_of_birth: profile?.date_of_birth || '',
+        has_equipment: profile?.has_equipment || false
+      });
       await fetchProgress();
+      await fetchProfile();
       setWeight('');
       setHeight('');
       setPhoto(null);
       setNotes('');
+      toast.success('Запись успешно добавлена');
     } catch (error) {
       console.error('Ошибка при добавлении записи:', error);
+      toast.error('Ошибка при добавлении записи');
     }
   };
 
   const handleDelete = async (id: number) => {
-    try {
-      await apiService.deleteProgress(id);
-      await fetchProgress();
-    } catch (error) {
-      console.error('Ошибка при удалении записи:', error);
+    if (window.confirm('Вы уверены, что хотите удалить эту запись?')) {
+      try {
+        await apiService.deleteProgress(id);
+        await fetchProgress();
+        toast.success('Запись успешно удалена');
+      } catch (error) {
+        console.error('Ошибка при удалении записи:', error);
+        toast.error('Ошибка при удалении записи');
+      }
     }
   };
 
@@ -288,7 +301,11 @@ const Progress: React.FC = () => {
                 onClick={() => toggleDate(date)}
               >
                 <div className="text-xl font-semibold text-gray-100">
-                  {new Date(date).toLocaleDateString('ru-RU')}
+                  {new Date(date).toLocaleDateString('ru-RU', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                  })}
                 </div>
                 <button className="text-gray-400 hover:text-yellow-500 transition">
                   {expandedDates[date] ? (
@@ -301,7 +318,7 @@ const Progress: React.FC = () => {
               {expandedDates[date] && (
                 <div className="mt-4 space-y-4">
                   {entries.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).map((entry) => (
-                    <div key={entry.id} className="flex justify-between items-start">
+                    <div key={entry.id} className="flex justify-between items-start bg-gray-700/50 p-4 rounded-lg">
                       <div className="flex-1">
                         <div className="flex items-center gap-4 mb-4">
                           <div className="text-2xl font-semibold text-gray-100">
@@ -315,7 +332,7 @@ const Progress: React.FC = () => {
                         </div>
                         {entry.photo && (
                           <img
-                            src={`http://localhost:8000${entry.photo}`}
+                            src={entry.photo}
                             alt="Progress"
                             className="w-32 h-32 object-cover rounded-md mb-4"
                           />
@@ -323,6 +340,9 @@ const Progress: React.FC = () => {
                         {entry.notes && (
                           <div className="text-gray-300 mb-4">{entry.notes}</div>
                         )}
+                        <div className="text-sm text-gray-400">
+                          {new Date(entry.created_at).toLocaleTimeString('ru-RU')}
+                        </div>
                       </div>
                       <button
                         onClick={() => handleDelete(entry.id)}

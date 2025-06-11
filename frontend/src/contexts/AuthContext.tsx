@@ -1,12 +1,12 @@
 import React, {createContext, useContext, useEffect, useState} from 'react';
 import { apiService } from '../services/api';
-import { User } from "../types/user.ts";
+import { UserType } from "../types/user.ts";
 import { AuthContextType } from "../types/auth";
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<UserType | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
@@ -19,6 +19,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         const response = await apiService.getProfile();
         setUser(response.data);
+        localStorage.setItem('userId', response.data.id.toString());
         setIsAuthenticated(true);
       } catch (error) {
         localStorage.removeItem('accessToken');
@@ -36,6 +37,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       const userResponse = await apiService.getProfile();
       setUser(userResponse.data);
+      localStorage.setItem('userId', userResponse.data.id.toString());
       setIsAuthenticated(true);
     } catch (error) {
       console.error('Ошибка при получении данных пользователя:', error);
@@ -65,6 +67,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = () => {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
+    localStorage.removeItem('userId');
     setUser(null);
     setIsAuthenticated(false);
   };

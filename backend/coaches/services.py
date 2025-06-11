@@ -2,10 +2,10 @@ from django.conf import settings
 from openai import OpenAIError
 
 
-def generate_answer(messages: list, model="gpt-4o-mini", temperature=0.6) -> str:
+def generate_answer(messages: list, temperature=0.7) -> str:
     try:
         completion = settings.OPENAI_CLIENT.chat.completions.create(
-            model=model,
+            model=settings.OPENAI_MODEL,
             temperature=temperature,
             messages=messages,
         )

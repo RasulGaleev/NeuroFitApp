@@ -10,3 +10,7 @@ class Workout(models.Model):
     plan = models.JSONField()
     completed = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Тренировка'
+        verbose_name_plural = 'Тренировки'
