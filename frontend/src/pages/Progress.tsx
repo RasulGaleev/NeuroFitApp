@@ -117,26 +117,28 @@ const Progress: React.FC = () => {
     }
   };
 
+  const sortedProgress = [...progress].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
   const chartData = {
-    labels: progress.map(p => new Date(p.date).toLocaleDateString()),
+    labels: sortedProgress.map(p => new Date(p.date).toLocaleDateString()),
     datasets: [
       {
         label: 'Вес (кг)',
-        data: progress.map(p => p.weight),
+        data: sortedProgress.map(p => p.weight),
         borderColor: 'rgb(234, 179, 8)',
         backgroundColor: 'rgba(234, 179, 8, 0.5)',
         tension: 0.4
       },
       {
         label: 'Рост (см)',
-        data: progress.map(p => p.height),
+        data: sortedProgress.map(p => p.height),
         borderColor: 'rgb(59, 130, 246)',
         backgroundColor: 'rgba(59, 130, 246, 0.5)',
         tension: 0.4
       },
       {
         label: 'ИМТ',
-        data: progress.map(p => p.bmi),
+        data: sortedProgress.map(p => p.bmi),
         borderColor: 'rgb(16, 185, 129)',
         backgroundColor: 'rgba(16, 185, 129, 0.5)',
         tension: 0.4
