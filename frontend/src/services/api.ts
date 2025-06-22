@@ -37,7 +37,11 @@ api.interceptors.response.use(
   async (error: AxiosError) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      !originalRequest.url?.includes('/token/')
+    ) {
       originalRequest._retry = true;
       const refreshToken = getRefreshToken();
 
@@ -52,11 +56,11 @@ api.interceptors.response.use(
           return api(originalRequest);
         } catch (refreshError) {
           clearTokens();
-          window.location.href = '/login';
+          return Promise.reject(refreshError);
         }
       } else {
         clearTokens();
-        window.location.href = '/login';
+        return Promise.reject(error);
       }
     }
     return Promise.reject(error);

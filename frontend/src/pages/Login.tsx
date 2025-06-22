@@ -12,19 +12,21 @@ const Login = () => {
   const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await login(username, password);
-      toast.success('Успешный вход!');
-      navigate('/profile');
-    } catch (error: any) {
-      if (error.response?.status === 401) {
-        setError('Неверный логин или пароль');
-        return;
-      }
-      setError('Ошибка при входе');
+  e.preventDefault();
+  setError('');
+  try {
+    await login(username, password);
+    toast.success('Успешный вход!');
+    navigate('/profile');
+  } catch (error: any) {
+    if (error?.response?.status === 401) {
+      setError('Неверный логин или пароль');
+    } else {
+      setError('Ошибка при входе. Проверьте соединение с сервером');
     }
-  };
+    console.error('Ошибка авторизации:', err);
+  }
+};
 
   return (
     <div className="min-h-screen bg-gray-900 flex items-center justify-center px-4">
